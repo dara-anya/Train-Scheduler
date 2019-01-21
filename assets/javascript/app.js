@@ -22,24 +22,35 @@ $(document).ready(function(){
         var destination = $("#destination-input").val().trim();
         var firstTime = $("#first-time-input").val().trim();
         var frequency = $("#frequency-input").val().trim();
+
+        // CALCULATE NEXT ARRIVAL AND MINUTES UNTIL NEXT ARRIVAL
+        // Format firstTime to military time
+        var firstTimeConverted = moment(firstTime, "HH:mm").subtract(1, "years");
+        // Create a variable to store the current time
+        var currentTime = moment();
+        // Calculate the difference between the current time and firstTime in minutes
+        var diffTime = moment().diff(moment(firstTimeConverted), "minutes");
+        // Calculate the time apart (remainder)
+        var tRemainder = diffTime % frequency;
+        // Calculate the minutes until the next train arrives
+        var tMinutesTillTrain = frequency - tRemainder;
+        // Calculate the time the next train will arrive
+        var nextTrain = moment().add(tMinutesTillTrain, "minutes");
+        // Formate nextTrain to standard time format
+        var nextTrainFormatted = moment(nextTrain).format("hh:mm A");
+        
         // Push variables to firebase
         database.ref().push({
             name : name,
             destination : destination,
             firstTime : firstTime,
             frequency : frequency,
+            tMinutesTillTrain : tMinutesTillTrain,
+            nextTrainFormatted : nextTrainFormatted,
             dateAdded : firebase.database.ServerValue.TIMESTAMP
         });
-        console.log(firstTime);
     });
 
-    // Create a variable to store the current time
-    var currentTime = moment().format("HH:mm");
-    console.log(currentTime);
-
-    // Calculate the next arrival (firstTime + frequency)
-
-    
     // Create a function to run when a new child is added to Firebase
     database.ref().orderByChild("dataAdded").on("child_added", function(snapshot){
         // Create a variable to store the snapshot value
@@ -49,10 +60,10 @@ $(document).ready(function(){
         var newName = $("<td>").text(value.name);
         var newDestination = $("<td>").text(value.destination);
         var newFrequency = $("<td>").text(value.frequency);
-        var nextArrival = $("<td>").text();
-        var minutesAway = $("<td>").text();
+        var nextArrival = $("<td>").text(value.nextTrainFormatted);
+        var minutesAway = $("<td>").text(value.tMinutesTillTrain);
         // Create a new row and add input to HTML
-        var tr = $("<tr>").append(newName, newDestination, newFrequency, nextArrival. minutesAway);
+        var tr = $("<tr>").append(newName, newDestination, newFrequency, nextArrival, minutesAway);
         $("#trains").append(tr);
     });
 });
