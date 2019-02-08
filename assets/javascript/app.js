@@ -36,8 +36,10 @@ $(document).ready(function(){
         var tMinutesTillTrain = frequency - tRemainder;
         // Calculate the time the next train will arrive
         var nextTrain = moment().add(tMinutesTillTrain, "minutes");
+        console.log("MINUTES TILL TRAIN: " + tMinutesTillTrain);
         // Formate nextTrain to standard time format
         var nextTrainFormatted = moment(nextTrain).format("hh:mm A");
+        console.log("ARRIVAL TIME: " + nextTrainFormatted);
         
         // Push variables to firebase
         database.ref().push({
